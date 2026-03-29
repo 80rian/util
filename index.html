@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reels Cover Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Google Fonts CDN (한글 폰트) -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;800;900&family=Noto+Serif+KR:wght@400;700;900&family=Black+Han+Sans&family=Jua&family=Do+Hyeon&family=Gothic+A1:wght@400;700;800;900&family=Gowun+Dodum&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Naver Fonts CDN -->
+  <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
+  <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-gothic.css" rel="stylesheet">
+  <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-myeongjo.css" rel="stylesheet">
+  <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-barun-gothic.css" rel="stylesheet">
+  <style>
+    /* ── Bundled Fonts ── */
+    @font-face { font-family: 'Bebas Neue'; src: url('fonts/BebasNeue.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+    @font-face { font-family: 'Outfit'; src: url('fonts/Outfit-Variable.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
+    @font-face { font-family: 'JetBrains Mono'; src: url('fonts/JetBrainsMono-Variable.woff2') format('woff2'); font-weight: 400 500; font-display: swap; }
+
+    @font-face { font-family: 'NanumSquare'; src: url('fonts/NanumSquare-Regular.woff') format('woff'); font-weight: 400; font-display: swap; }
+    @font-face { font-family: 'NanumSquare'; src: url('fonts/NanumSquare-Bold.woff') format('woff'); font-weight: 700; font-display: swap; }
+    @font-face { font-family: 'NanumSquare'; src: url('fonts/NanumSquare-ExtraBold.woff') format('woff'); font-weight: 800; font-display: swap; }
+
+    @font-face { font-family: 'S-CoreDream'; src: url('fonts/SCDream-Regular.woff') format('woff'); font-weight: 400; font-display: swap; }
+    @font-face { font-family: 'S-CoreDream'; src: url('fonts/SCDream-Medium.woff') format('woff'); font-weight: 500; font-display: swap; }
+    @font-face { font-family: 'S-CoreDream'; src: url('fonts/SCDream-Bold.woff') format('woff'); font-weight: 700; font-display: swap; }
+    @font-face { font-family: 'S-CoreDream'; src: url('fonts/SCDream-Black.woff') format('woff'); font-weight: 900; font-display: swap; }
+    *,*::before,*::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #F2EDE4;
+      --surface: #FFFFFF;
+      --ink: #111111;
+      --ink-mid: #555550;
+      --ink-light: #999990;
+      --border: #111111;
+      --border-light: #D5D0C8;
+      --accent: #E8430A;
+      --accent-hover: #CC3A08;
+      --tag-bg: #111111;
+      --tag-text: #F2EDE4;
+      --font-display: 'Bebas Neue', 'Noto Sans KR', sans-serif;
+      --font-body: 'Outfit', 'Noto Sans KR', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      border-bottom: 3px solid var(--ink);
+      padding-bottom: 1rem;
+    }
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: var(--ink);
+    }
+    .header .version-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      padding: 0.2em 0.5em;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      vertical-align: top;
+    }
+
+    /* ── Section labels ── */
+    .section-label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--ink-light);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 0.6rem;
+    }
+
+    .main > section {
+      margin-bottom: 2.2rem;
+    }
+
+    /* ── Dropzone ── */
+    .dropzone {
+      border: 2.5px dashed var(--border-light);
+      padding: 2.8rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: var(--surface);
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: #FFF8F5;
+    }
+    .dropzone-icon {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 0.8rem;
+      border: 2px solid var(--ink-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dropzone-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--ink-light);
+    }
+    .dropzone-text {
+      color: var(--ink-light);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .dropzone.has-image {
+      padding: 0.6rem;
+      border-style: solid;
+      border-color: var(--border-light);
+    }
+    .dropzone.has-image:hover { border-color: var(--accent); }
+    .dropzone.has-image .dropzone-text,
+    .dropzone.has-image .dropzone-icon { display: none; }
+    .dropzone .thumb {
+      max-width: 240px;
+      max-height: 140px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* ── Textarea ── */
+    textarea {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      font-size: 1rem;
+      font-family: var(--font-body);
+      font-weight: 500;
+      background: var(--surface);
+      border: 2px solid var(--border-light);
+      color: var(--ink);
+      resize: vertical;
+      transition: border-color 0.15s;
+    }
+    textarea::placeholder { color: var(--ink-light); font-weight: 400; }
+    textarea:focus {
+      outline: none;
+      border-color: var(--ink);
+    }
+
+    /* ── Presets ── */
+    .preset-recommendation {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .preset-recommendation.visible { opacity: 1; }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0;
+    }
+    .preset-btn {
+      background: var(--surface);
+      border: 2px solid var(--ink);
+      margin-right: -2px;
+      margin-bottom: -2px;
+      padding: 0.4rem;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s, transform 0.1s;
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      position: relative;
+    }
+    .preset-btn:hover {
+      background: #F5F0E8;
+      z-index: 1;
+    }
+    .preset-btn.active {
+      background: var(--ink);
+      color: var(--bg);
+      z-index: 2;
+    }
+    .preset-btn .preset-preview {
+      height: 40px;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.8rem;
+      overflow: hidden;
+    }
+    .preset-btn .preset-name {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Font controls ── */
+    .font-controls {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+    }
+    select {
+      flex: 1;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.85rem;
+      font-family: var(--font-body);
+      font-weight: 500;
+      background: var(--surface);
+      border: 2px solid var(--border-light);
+      color: var(--ink);
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555550' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2rem;
+    }
+    select:focus { outline: none; border-color: var(--ink); }
+
+    .font-upload-btn {
+      padding: 0.6rem 1rem;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      background: var(--ink);
+      border: 2px solid var(--ink);
+      color: var(--bg);
+      cursor: pointer;
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: background 0.15s;
+    }
+    .font-upload-btn:hover {
+      background: #333;
+    }
+
+    /* ── Font size slider ── */
+    .font-size-section { margin-top: 0.8rem; }
+    .font-size-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .font-size-controls input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 3px;
+      background: var(--border-light);
+      outline: none;
+    }
+    .font-size-controls input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--ink);
+      cursor: pointer;
+      border: none;
+    }
+    .font-size-value {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--ink-mid);
+      min-width: 3.5em;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Preview ── */
+    .preview-container {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    .preview-item { flex-shrink: 0; }
+    .preview-item .section-label {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    #reelsCanvas {
+      width: 260px;
+      height: 462px;
+      background: var(--surface);
+      border: 2px solid var(--ink);
+    }
+    #feedCanvas {
+      width: 260px;
+      height: 260px;
+      background: var(--surface);
+      border: 2px solid var(--ink);
+    }
+
+    /* ── Download ── */
+    .download-btn {
+      width: 100%;
+      padding: 1rem;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      text-transform: uppercase;
+    }
+    .download-btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+    .download-btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .download-btn:disabled {
+      background: var(--border-light);
+      color: var(--ink-light);
+      cursor: not-allowed;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .preset-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .preview-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>REELS COVER</h1>
+      <span class="version-tag">v1.0</span>
+    </header>
+
+    <main class="main">
+      <!-- Image Upload -->
+      <section class="upload-section">
+        <span class="section-label">01 — Image</span>
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <p class="dropzone-text">이미지를 드래그하거나 클릭하여 업로드</p>
+          <input type="file" id="fileInput" accept="image/*" hidden>
+        </div>
+      </section>
+
+      <!-- Title Input -->
+      <section class="input-section">
+        <span class="section-label">02 — Title</span>
+        <textarea id="titleInput" rows="2" placeholder="커버에 표시할 텍스트"></textarea>
+      </section>
+
+      <!-- Presets -->
+      <section class="preset-section">
+        <span class="section-label">03 — Style</span>
+        <div class="preset-recommendation" id="presetRecommendation">
+          → <span id="recommendedPreset"></span>
+        </div>
+        <div class="preset-grid" id="presetGrid"></div>
+      </section>
+
+      <!-- Font -->
+      <section class="font-section">
+        <span class="section-label">04 — Font</span>
+        <div class="font-controls">
+          <select id="fontSelect">
+            <optgroup label="번들 폰트">
+              <option value="NanumSquare">나눔스퀘어</option>
+              <option value="S-CoreDream">에스코어드림</option>
+            </optgroup>
+            <optgroup label="Google Fonts">
+              <option value="Noto Sans KR" selected>Noto Sans KR</option>
+              <option value="Noto Serif KR">Noto Serif KR</option>
+              <option value="Black Han Sans">Black Han Sans</option>
+              <option value="Jua">Jua</option>
+              <option value="Do Hyeon">Do Hyeon</option>
+              <option value="Gothic A1">Gothic A1</option>
+              <option value="Gowun Dodum">Gowun Dodum</option>
+              <option value="Gowun Batang">Gowun Batang</option>
+            </optgroup>
+            <optgroup label="네이버 폰트">
+              <option value="NanumGothic">나눔고딕</option>
+              <option value="NanumMyeongjo">나눔명조</option>
+              <option value="NanumBarunGothic">나눔바른고딕</option>
+            </optgroup>
+            <optgroup label="macOS 시스템" id="systemFontGroup">
+              <option value="Apple SD Gothic Neo">Apple SD Gothic Neo</option>
+              <option value="SF Pro Display">SF Pro Display</option>
+              <option value="Helvetica Neue">Helvetica Neue</option>
+              <option value="Avenir Next">Avenir Next</option>
+              <option value="Futura">Futura</option>
+              <option value="Georgia">Georgia</option>
+            </optgroup>
+          </select>
+          <button class="font-upload-btn" id="fontUploadBtn" type="button">Upload</button>
+          <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" hidden>
+        </div>
+        <div class="font-size-section">
+          <span class="section-label">Size</span>
+          <div class="font-size-controls">
+            <input type="range" id="fontSizeSlider" min="40" max="140" value="76">
+            <span class="font-size-value" id="fontSizeValue">76px</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preview -->
+      <section class="preview-section">
+        <div class="preview-container">
+          <div class="preview-item">
+            <span class="section-label">Reels 9:16</span>
+            <canvas id="reelsCanvas" width="1080" height="1920"></canvas>
+          </div>
+          <div class="preview-item">
+            <span class="section-label">Feed 1:1</span>
+            <canvas id="feedCanvas" width="1080" height="1080"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Download -->
+      <section class="download-section">
+        <button class="download-btn" id="downloadBtn" type="button" disabled>Download PNG</button>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ===== PRESETS =====
+    const PRESETS = [
+      {
+        id: 'clean-white',
+        name: '클린 화이트',
+        textColor: '#ffffff',
+        fontWeight: 800,
+        shadow: { offsetX: 0, offsetY: 2, blur: 12, color: 'rgba(0,0,0,0.6)' },
+        background: null,
+        overlay: null,
+        previewBg: '#3a5a40',
+        lightBackground: false,
+      },
+      {
+        id: 'hard-shadow',
+        name: '하드 섀도우',
+        textColor: '#ffffff',
+        fontWeight: 800,
+        shadow: { offsetX: 4, offsetY: 4, blur: 0, color: 'rgba(0,0,0,0.8)' },
+        background: null,
+        overlay: null,
+        previewBg: '#5c4033',
+        lightBackground: false,
+      },
+      {
+        id: 'dark-modern',
+        name: '다크 모던',
+        textColor: '#1a1a1a',
+        fontWeight: 800,
+        shadow: null,
+        background: null,
+        overlay: null,
+        previewBg: '#e8dcc8',
+        lightBackground: true,
+      },
+      {
+        id: 'solid-label',
+        name: '솔리드 라벨',
+        textColor: '#ffffff',
+        fontWeight: 700,
+        shadow: null,
+        background: { color: 'rgba(0,0,0,0.75)', paddingX: 24, paddingY: 12, radius: 8 },
+        overlay: null,
+        previewBg: '#764ba2',
+        lightBackground: false,
+      },
+      {
+        id: 'frosted-glass',
+        name: '프로스트 글래스',
+        textColor: '#ffffff',
+        fontWeight: 700,
+        shadow: null,
+        background: { color: 'rgba(255,255,255,0.18)', paddingX: 30, paddingY: 16, radius: 16, blur: 20, border: 'rgba(255,255,255,0.25)' },
+        overlay: null,
+        previewBg: '#2193b0',
+        lightBackground: false,
+      },
+      {
+        id: 'highlight',
+        name: '하이라이트',
+        textColor: '#1a1a1a',
+        fontWeight: 800,
+        shadow: null,
+        background: { color: 'rgba(255,220,50,0.75)', paddingX: 14, paddingY: 4, radius: 4, perLine: true },
+        overlay: null,
+        previewBg: '#2a2a2a',
+        lightBackground: false,
+      },
+      {
+        id: 'gradient-scrim',
+        name: '그라디언트',
+        textColor: '#ffffff',
+        fontWeight: 800,
+        shadow: { offsetX: 0, offsetY: 1, blur: 8, color: 'rgba(0,0,0,0.4)' },
+        background: null,
+        overlay: { type: 'gradient', from: 'rgba(0,0,0,0)', to: 'rgba(0,0,0,0.65)', position: 0.45 },
+        previewBg: '#8B7355',
+        lightBackground: false,
+      },
+    ];
+
+    // ===== STATE =====
+    const state = {
+      image: null,
+      title: '',
+      preset: PRESETS[0],
+      fontFamily: 'Noto Sans KR',
+      fontSize: 76,
+    };
+
+    // ===== UTILS =====
+    const $ = (sel) => document.querySelector(sel);
+
+    // ===== PRESET UI =====
+    function renderPresetGrid() {
+      const grid = $('#presetGrid');
+      grid.innerHTML = PRESETS.map(p => `
+        <button class="preset-btn ${p.id === state.preset.id ? 'active' : ''}"
+                data-preset-id="${p.id}" type="button">
+          <div class="preset-preview" style="background:${p.previewBg};">
+            <span style="
+              color:${p.textColor};
+              font-weight:${p.fontWeight};
+              ${p.shadow ? `text-shadow:${p.shadow.offsetX}px ${p.shadow.offsetY}px ${p.shadow.blur}px ${p.shadow.color}` : ''}
+              ${p.background && !p.background.perLine ? `;background:${p.background.color};padding:2px 6px;border-radius:${p.background.radius}px` : ''}
+              ${p.background && p.background.perLine ? `;background:${p.background.color};padding:1px 5px;border-radius:${p.background.radius}px` : ''}
+            ">가나다</span>
+          </div>
+          <div class="preset-name">${p.name}</div>
+        </button>
+      `).join('');
+    }
+
+    renderPresetGrid();
+
+    $('#presetGrid').addEventListener('click', (e) => {
+      const btn = e.target.closest('.preset-btn');
+      if (!btn) return;
+      const preset = PRESETS.find(p => p.id === btn.dataset.presetId);
+      if (preset) {
+        state.preset = preset;
+        renderPresetGrid();
+        render();
+      }
+    });
+
+    // ===== IMAGE UPLOAD =====
+    function loadImage(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          state.image = img;
+          showThumbnail(img);
+          analyzeAndRecommend(img);
+          render();
+          $('#downloadBtn').disabled = false;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function showThumbnail(img) {
+      const dropzone = $('#dropzone');
+      dropzone.classList.add('has-image');
+      const existing = dropzone.querySelector('.thumb');
+      if (existing) existing.remove();
+      const thumb = document.createElement('img');
+      thumb.src = img.src;
+      thumb.className = 'thumb';
+      dropzone.appendChild(thumb);
+    }
+
+    const dropzone = $('#dropzone');
+    const fileInput = $('#fileInput');
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      loadImage(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => {
+      loadImage(fileInput.files[0]);
+    });
+
+    // ===== RENDER =====
+    function render() {
+      if (!state.image) return;
+      renderReelsCanvas();
+      renderFeedCanvas();
+    }
+
+    function renderReelsCanvas() {
+      const canvas = $('#reelsCanvas');
+      const ctx = canvas.getContext('2d');
+      const W = 1080, H = 1920;
+      canvas.width = W;
+      canvas.height = H;
+
+      drawImageCover(ctx, state.image, W, H);
+
+      if (state.preset.overlay) {
+        drawOverlay(ctx, state.preset.overlay, W, H);
+      }
+
+      drawTitle(ctx, state.title, state.preset, W, H);
+    }
+
+    function renderFeedCanvas() {
+      const reelsCanvas = $('#reelsCanvas');
+      const feedCanvas = $('#feedCanvas');
+      const ctx = feedCanvas.getContext('2d');
+      const size = 1080;
+      feedCanvas.width = size;
+      feedCanvas.height = size;
+
+      const cropY = (1920 - size) / 2;
+      ctx.drawImage(reelsCanvas, 0, cropY, size, size, 0, 0, size, size);
+    }
+
+    function drawImageCover(ctx, img, W, H) {
+      const imgRatio = img.width / img.height;
+      const canvasRatio = W / H;
+      let sx, sy, sw, sh;
+
+      if (imgRatio > canvasRatio) {
+        sh = img.height;
+        sw = sh * canvasRatio;
+        sx = (img.width - sw) / 2;
+        sy = 0;
+      } else {
+        sw = img.width;
+        sh = sw / canvasRatio;
+        sx = 0;
+        sy = (img.height - sh) / 2;
+      }
+
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+    }
+
+    function drawOverlay(ctx, overlay, W, H) {
+      if (overlay.type === 'gradient') {
+        const startY = H * overlay.position;
+        const grad = ctx.createLinearGradient(0, startY, 0, H);
+        grad.addColorStop(0, overlay.from);
+        grad.addColorStop(1, overlay.to);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+      }
+    }
+
+    function drawTitle(ctx, text, preset, W, H) {
+      if (!text.trim()) return;
+
+      const fontSize = state.fontSize;
+      ctx.font = `${preset.fontWeight} ${fontSize}px '${state.fontFamily}', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const lines = text.split('\n').filter(l => l.trim());
+      const lineHeight = fontSize * 1.4;
+      const totalHeight = lines.length * lineHeight;
+      const startY = (H - totalHeight) / 2 + lineHeight / 2;
+
+      if (preset.background) {
+        drawTextBackground(ctx, lines, preset, W, startY, fontSize, lineHeight);
+      }
+
+      if (preset.shadow) {
+        ctx.shadowOffsetX = preset.shadow.offsetX;
+        ctx.shadowOffsetY = preset.shadow.offsetY;
+        ctx.shadowBlur = preset.shadow.blur;
+        ctx.shadowColor = preset.shadow.color;
+      }
+
+      ctx.fillStyle = preset.textColor;
+      lines.forEach((line, i) => {
+        ctx.fillText(line.trim(), W / 2, startY + i * lineHeight);
+      });
+
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+    }
+
+    function drawTextBackground(ctx, lines, preset, W, startY, fontSize, lineHeight) {
+      const bg = preset.background;
+
+      if (bg.perLine) {
+        lines.forEach((line, i) => {
+          const metrics = ctx.measureText(line.trim());
+          const tw = metrics.width;
+          const x = W / 2 - tw / 2 - bg.paddingX;
+          const y = startY + i * lineHeight - fontSize / 2 - bg.paddingY;
+          const w = tw + bg.paddingX * 2;
+          const h = fontSize + bg.paddingY * 2;
+          roundRect(ctx, x, y, w, h, bg.radius, bg.color);
+        });
+      } else if (bg.blur) {
+        const maxWidth = Math.max(...lines.map(l => ctx.measureText(l.trim()).width));
+        const x = W / 2 - maxWidth / 2 - bg.paddingX;
+        const y = startY - fontSize / 2 - bg.paddingY;
+        const w = maxWidth + bg.paddingX * 2;
+        const h = lines.length * lineHeight + bg.paddingY * 2 - (lineHeight - fontSize);
+        drawFrostedGlass(ctx, x, y, w, h, bg);
+      } else {
+        const maxWidth = Math.max(...lines.map(l => ctx.measureText(l.trim()).width));
+        const x = W / 2 - maxWidth / 2 - bg.paddingX;
+        const y = startY - fontSize / 2 - bg.paddingY;
+        const w = maxWidth + bg.paddingX * 2;
+        const h = lines.length * lineHeight + bg.paddingY * 2 - (lineHeight - fontSize);
+        roundRect(ctx, x, y, w, h, bg.radius, bg.color);
+      }
+    }
+
+    function drawFrostedGlass(ctx, x, y, w, h, bg) {
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = w;
+      tempCanvas.height = h;
+      const tempCtx = tempCanvas.getContext('2d');
+
+      const sourceCanvas = $('#reelsCanvas');
+      tempCtx.drawImage(sourceCanvas, x, y, w, h, 0, 0, w, h);
+
+      const scale = 0.1;
+      const smallW = Math.max(1, Math.round(w * scale));
+      const smallH = Math.max(1, Math.round(h * scale));
+      const smallCanvas = document.createElement('canvas');
+      smallCanvas.width = smallW;
+      smallCanvas.height = smallH;
+      const smallCtx = smallCanvas.getContext('2d');
+      smallCtx.drawImage(tempCanvas, 0, 0, smallW, smallH);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, bg.radius);
+      ctx.clip();
+      ctx.drawImage(smallCanvas, 0, 0, smallW, smallH, x, y, w, h);
+
+      ctx.fillStyle = bg.color;
+      ctx.fill();
+
+      if (bg.border) {
+        ctx.strokeStyle = bg.border;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, w, h, r, fillColor) {
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, r);
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+    }
+
+    // Title input
+    $('#titleInput').addEventListener('input', (e) => {
+      state.title = e.target.value;
+      render();
+    });
+
+    // ===== AUTO RECOMMEND =====
+    function analyzeAndRecommend(img) {
+      const canvas = document.createElement('canvas');
+      const size = 100;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      const imgRatio = img.width / img.height;
+      const targetRatio = 9 / 16;
+      let sx, sy, sw, sh;
+      if (imgRatio > targetRatio) {
+        sh = img.height;
+        sw = sh * targetRatio;
+        sx = (img.width - sw) / 2;
+        sy = 0;
+      } else {
+        sw = img.width;
+        sh = sw / targetRatio;
+        sx = 0;
+        sy = (img.height - sh) / 2;
+      }
+
+      const centerSx = sx + sw * 0.2;
+      const centerSy = sy + sh * 0.33;
+      const centerSw = sw * 0.6;
+      const centerSh = sh * 0.34;
+
+      ctx.drawImage(img, centerSx, centerSy, centerSw, centerSh, 0, 0, size, size);
+      const data = ctx.getImageData(0, 0, size, size).data;
+
+      let totalLuminance = 0;
+      const pixelCount = size * size;
+      for (let i = 0; i < data.length; i += 4) {
+        totalLuminance += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      }
+      const avgLuminance = totalLuminance / pixelCount;
+
+      const recommended = avgLuminance > 140
+        ? PRESETS.find(p => p.lightBackground)
+        : PRESETS[0];
+
+      state.preset = recommended;
+      renderPresetGrid();
+
+      const recEl = $('#presetRecommendation');
+      recEl.classList.add('visible');
+      $('#recommendedPreset').textContent = recommended.name;
+    }
+
+    // ===== LOCAL FONT DETECTION =====
+    async function loadLocalFonts() {
+      if (!('queryLocalFonts' in window)) return;
+      try {
+        const fonts = await window.queryLocalFonts();
+        const familySet = new Set();
+        fonts.forEach(f => familySet.add(f.family));
+
+        const families = [...familySet].sort((a, b) => a.localeCompare(b, 'ko'));
+        if (families.length === 0) return;
+
+        const select = $('#fontSelect');
+        const systemGroup = $('#systemFontGroup');
+
+        // Replace static system fonts with detected ones
+        systemGroup.innerHTML = '';
+        systemGroup.label = '로컬 폰트 (' + families.length + ')';
+
+        families.forEach(family => {
+          const opt = document.createElement('option');
+          opt.value = family;
+          opt.textContent = family;
+          systemGroup.appendChild(opt);
+        });
+      } catch (e) {
+        // Permission denied or API unavailable — keep static list
+      }
+    }
+    loadLocalFonts();
+
+    // ===== FONT UPLOAD =====
+    $('#fontUploadBtn').addEventListener('click', () => $('#fontFileInput').click());
+
+    $('#fontFileInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const fontName = file.name.replace(/\.(ttf|otf|woff2?)$/i, '');
+      const arrayBuffer = await file.arrayBuffer();
+      const fontFace = new FontFace(fontName, arrayBuffer);
+
+      try {
+        const loaded = await fontFace.load();
+        document.fonts.add(loaded);
+
+        const select = $('#fontSelect');
+        const option = document.createElement('option');
+        option.value = fontName;
+        option.textContent = `${fontName} (로컬)`;
+        select.appendChild(option);
+        select.value = fontName;
+
+        state.fontFamily = fontName;
+        render();
+      } catch (err) {
+        alert('폰트를 로드할 수 없습니다: ' + err.message);
+      }
+    });
+
+    $('#fontSelect').addEventListener('change', (e) => {
+      state.fontFamily = e.target.value;
+      render();
+    });
+
+    // ===== FONT SIZE =====
+    $('#fontSizeSlider').addEventListener('input', (e) => {
+      state.fontSize = parseInt(e.target.value, 10);
+      $('#fontSizeValue').textContent = state.fontSize + 'px';
+      render();
+    });
+
+    // ===== DOWNLOAD =====
+    $('#downloadBtn').addEventListener('click', () => {
+      const canvas = $('#reelsCanvas');
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const safeTitle = state.title.split('\n')[0].trim().slice(0, 20).replace(/[^가-힣a-zA-Z0-9]/g, '_') || 'cover';
+      link.download = `reels-cover-${safeTitle}-${timestamp}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+</body>
+</html>
