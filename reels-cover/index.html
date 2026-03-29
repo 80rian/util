@@ -60,6 +60,9 @@
       margin: 0 auto;
       padding: 3rem 2rem 5rem;
     }
+    .app.editor-mode {
+      max-width: 1100px;
+    }
 
     /* ── Header ── */
     .back-btn {
@@ -120,9 +123,13 @@
     }
 
     /* ── Dropzone ── */
+    .upload-section {
+      max-width: 500px;
+      margin: 0 auto;
+    }
     .dropzone {
       border: 2.5px dashed var(--border-light);
-      padding: 2.8rem 2rem;
+      padding: 4rem 2rem;
       text-align: center;
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
@@ -151,19 +158,38 @@
       font-size: 0.85rem;
       font-weight: 500;
     }
-    .dropzone.has-image {
-      padding: 0.6rem;
-      border-style: solid;
-      border-color: var(--border-light);
+
+    /* ── Editor layout ── */
+    .editor { display: none; gap: 2rem; }
+    .editor.visible {
+      display: grid;
+      grid-template-columns: auto 1fr;
     }
-    .dropzone.has-image:hover { border-color: var(--accent); }
-    .dropzone.has-image .dropzone-text,
-    .dropzone.has-image .dropzone-icon { display: none; }
-    .dropzone .thumb {
-      max-width: 240px;
-      max-height: 140px;
+    .editor-preview {
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+    }
+    .editor-preview .change-image-btn {
       display: block;
-      margin: 0 auto;
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--ink-mid);
+      background: none;
+      border: 1.5px solid var(--border-light);
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .editor-preview .change-image-btn:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+    .editor-controls > section {
+      margin-bottom: 2rem;
     }
 
     /* ── Textarea ── */
@@ -199,7 +225,7 @@
 
     .preset-grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      grid-template-columns: repeat(9, 1fr);
       gap: 0;
     }
     .preset-btn {
@@ -242,6 +268,49 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    /* ── Toggle ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ink-mid);
+      letter-spacing: 0.02em;
+    }
+    .toggle-row input { display: none; }
+    .toggle-switch {
+      width: 36px;
+      height: 20px;
+      background: var(--border-light);
+      border-radius: 10px;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle-row input:checked + .toggle-switch {
+      background: var(--ink);
+    }
+    .toggle-row input:checked + .toggle-switch::after {
+      transform: translateX(16px);
     }
 
     /* ── Font controls ── */
@@ -319,28 +388,25 @@
     }
 
     /* ── Preview ── */
-    .preview-container {
-      display: flex;
-      gap: 1.5rem;
-      align-items: flex-start;
-    }
-    .preview-item { flex-shrink: 0; }
-    .preview-item .section-label {
-      text-align: center;
-      margin-bottom: 0.5rem;
-    }
     #reelsCanvas {
-      width: 260px;
-      height: 462px;
+      width: 320px;
+      height: 569px;
       background: var(--surface);
       border: 2px solid var(--ink);
+      display: block;
+    }
+    .feed-preview {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
     #feedCanvas {
-      width: 260px;
-      height: 260px;
+      width: 120px;
+      height: 120px;
       background: var(--surface);
       border: 2px solid var(--ink);
     }
+    .feed-preview .section-label { margin-bottom: 0; }
 
     /* ── Download ── */
     .download-btn {
@@ -363,20 +429,27 @@
     .download-btn:active:not(:disabled) {
       transform: translateY(1px);
     }
-    .download-btn:disabled {
-      background: var(--border-light);
-      color: var(--ink-light);
-      cursor: not-allowed;
-    }
 
     /* ── Responsive ── */
-    @media (max-width: 700px) {
-      .preset-grid {
-        grid-template-columns: repeat(4, 1fr);
+    @media (max-width: 780px) {
+      .editor.visible {
+        grid-template-columns: 1fr;
       }
-      .preview-container {
+      .editor-preview {
+        position: static;
+        display: flex;
         flex-direction: column;
         align-items: center;
+      }
+      .editor-preview .change-image-btn {
+        max-width: 320px;
+      }
+      #reelsCanvas {
+        width: 280px;
+        height: 498px;
+      }
+      .preset-grid {
+        grid-template-columns: repeat(3, 1fr);
       }
     }
   </style>
@@ -393,9 +466,8 @@
     </header>
 
     <main class="main">
-      <!-- Image Upload -->
-      <section class="upload-section">
-        <span class="section-label">01 — Image</span>
+      <!-- Upload (initial state) -->
+      <section class="upload-section" id="uploadSection">
         <div class="dropzone" id="dropzone">
           <div class="dropzone-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -409,84 +481,93 @@
         </div>
       </section>
 
-      <!-- Title Input -->
-      <section class="input-section">
-        <span class="section-label">02 — Title</span>
-        <textarea id="titleInput" rows="2" placeholder="커버에 표시할 텍스트"></textarea>
-      </section>
-
-      <!-- Presets -->
-      <section class="preset-section">
-        <span class="section-label">03 — Style</span>
-        <div class="preset-recommendation" id="presetRecommendation">
-          → <span id="recommendedPreset"></span>
+      <!-- Editor (after image upload) -->
+      <div class="editor" id="editor">
+        <div class="editor-preview">
+          <canvas id="reelsCanvas" width="1080" height="1920"></canvas>
+          <button class="change-image-btn" id="changeImageBtn" type="button">이미지 변경</button>
         </div>
-        <div class="preset-grid" id="presetGrid"></div>
-      </section>
 
-      <!-- Font -->
-      <section class="font-section">
-        <span class="section-label">04 — Font</span>
-        <div class="font-controls">
-          <select id="fontSelect">
-            <optgroup label="번들 폰트">
-              <option value="NanumSquare">나눔스퀘어</option>
-              <option value="S-CoreDream">에스코어드림</option>
-            </optgroup>
-            <optgroup label="Google Fonts">
-              <option value="Noto Sans KR" selected>Noto Sans KR</option>
-              <option value="Noto Serif KR">Noto Serif KR</option>
-              <option value="Black Han Sans">Black Han Sans</option>
-              <option value="Jua">Jua</option>
-              <option value="Do Hyeon">Do Hyeon</option>
-              <option value="Gothic A1">Gothic A1</option>
-              <option value="Gowun Dodum">Gowun Dodum</option>
-              <option value="Gowun Batang">Gowun Batang</option>
-            </optgroup>
-            <optgroup label="네이버 폰트">
-              <option value="NanumGothic">나눔고딕</option>
-              <option value="NanumMyeongjo">나눔명조</option>
-              <option value="NanumBarunGothic">나눔바른고딕</option>
-            </optgroup>
-            <optgroup label="macOS 시스템" id="systemFontGroup">
-              <option value="Apple SD Gothic Neo">Apple SD Gothic Neo</option>
-              <option value="SF Pro Display">SF Pro Display</option>
-              <option value="Helvetica Neue">Helvetica Neue</option>
-              <option value="Avenir Next">Avenir Next</option>
-              <option value="Futura">Futura</option>
-              <option value="Georgia">Georgia</option>
-            </optgroup>
-          </select>
-          <button class="font-upload-btn" id="fontUploadBtn" type="button">Upload</button>
-          <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" hidden>
-        </div>
-        <div class="font-size-section">
-          <span class="section-label">Size</span>
-          <div class="font-size-controls">
-            <input type="range" id="fontSizeSlider" min="40" max="140" value="76">
-            <span class="font-size-value" id="fontSizeValue">76px</span>
-          </div>
-        </div>
-      </section>
+        <div class="editor-controls">
+          <!-- Title -->
+          <section>
+            <span class="section-label">01 — Title</span>
+            <textarea id="titleInput" rows="2" placeholder="커버에 표시할 텍스트"></textarea>
+          </section>
 
-      <!-- Preview -->
-      <section class="preview-section">
-        <div class="preview-container">
-          <div class="preview-item">
-            <span class="section-label">Reels 9:16</span>
-            <canvas id="reelsCanvas" width="1080" height="1920"></canvas>
-          </div>
-          <div class="preview-item">
-            <span class="section-label">Feed 1:1</span>
-            <canvas id="feedCanvas" width="1080" height="1080"></canvas>
-          </div>
-        </div>
-      </section>
+          <!-- Style -->
+          <section>
+            <span class="section-label">02 — Style</span>
+            <div class="preset-recommendation" id="presetRecommendation">
+              → <span id="recommendedPreset"></span>
+            </div>
+            <div class="preset-grid" id="presetGrid"></div>
+            <label class="toggle-row">
+              <span class="toggle-label">그라디언트 오버레이</span>
+              <input type="checkbox" id="gradientToggle">
+              <span class="toggle-switch"></span>
+            </label>
+          </section>
 
-      <!-- Download -->
-      <section class="download-section">
-        <button class="download-btn" id="downloadBtn" type="button" disabled>Download PNG</button>
-      </section>
+          <!-- Font -->
+          <section>
+            <span class="section-label">03 — Font</span>
+            <div class="font-controls">
+              <select id="fontSelect">
+                <optgroup label="번들 폰트">
+                  <option value="NanumSquare">나눔스퀘어</option>
+                  <option value="S-CoreDream">에스코어드림</option>
+                </optgroup>
+                <optgroup label="Google Fonts">
+                  <option value="Noto Sans KR" selected>Noto Sans KR</option>
+                  <option value="Noto Serif KR">Noto Serif KR</option>
+                  <option value="Black Han Sans">Black Han Sans</option>
+                  <option value="Jua">Jua</option>
+                  <option value="Do Hyeon">Do Hyeon</option>
+                  <option value="Gothic A1">Gothic A1</option>
+                  <option value="Gowun Dodum">Gowun Dodum</option>
+                  <option value="Gowun Batang">Gowun Batang</option>
+                </optgroup>
+                <optgroup label="네이버 폰트">
+                  <option value="NanumGothic">나눔고딕</option>
+                  <option value="NanumMyeongjo">나눔명조</option>
+                  <option value="NanumBarunGothic">나눔바른고딕</option>
+                </optgroup>
+                <optgroup label="macOS 시스템" id="systemFontGroup">
+                  <option value="Apple SD Gothic Neo">Apple SD Gothic Neo</option>
+                  <option value="SF Pro Display">SF Pro Display</option>
+                  <option value="Helvetica Neue">Helvetica Neue</option>
+                  <option value="Avenir Next">Avenir Next</option>
+                  <option value="Futura">Futura</option>
+                  <option value="Georgia">Georgia</option>
+                </optgroup>
+              </select>
+              <button class="font-upload-btn" id="fontUploadBtn" type="button">Upload</button>
+              <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" hidden>
+            </div>
+            <div class="font-size-section">
+              <span class="section-label">Size</span>
+              <div class="font-size-controls">
+                <input type="range" id="fontSizeSlider" min="40" max="140" value="76">
+                <span class="font-size-value" id="fontSizeValue">76px</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Feed Preview -->
+          <section>
+            <div class="feed-preview">
+              <canvas id="feedCanvas" width="1080" height="1080"></canvas>
+              <span class="section-label">Feed 1:1</span>
+            </div>
+          </section>
+
+          <!-- Download -->
+          <section>
+            <button class="download-btn" id="downloadBtn" type="button">Download PNG</button>
+          </section>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -500,7 +581,6 @@
         fontWeight: 800,
         shadow: { offsetX: 0, offsetY: 2, blur: 12, color: 'rgba(0,0,0,0.6)' },
         background: null,
-        overlay: null,
         previewBg: '#3a5a40',
         lightBackground: false,
       },
@@ -511,7 +591,6 @@
         fontWeight: 800,
         shadow: { offsetX: 4, offsetY: 4, blur: 0, color: 'rgba(0,0,0,0.8)' },
         background: null,
-        overlay: null,
         previewBg: '#5c4033',
         lightBackground: false,
       },
@@ -522,7 +601,6 @@
         fontWeight: 800,
         shadow: null,
         background: null,
-        overlay: null,
         previewBg: '#e8dcc8',
         lightBackground: true,
       },
@@ -533,7 +611,6 @@
         fontWeight: 700,
         shadow: null,
         background: { color: 'rgba(0,0,0,0.75)', paddingX: 24, paddingY: 12, radius: 8 },
-        overlay: null,
         previewBg: '#764ba2',
         lightBackground: false,
       },
@@ -544,7 +621,6 @@
         fontWeight: 700,
         shadow: null,
         background: { color: 'rgba(255,255,255,0.18)', paddingX: 30, paddingY: 16, radius: 16, blur: 20, border: 'rgba(255,255,255,0.25)' },
-        overlay: null,
         previewBg: '#2193b0',
         lightBackground: false,
       },
@@ -555,20 +631,41 @@
         fontWeight: 800,
         shadow: null,
         background: { color: 'rgba(255,220,50,0.75)', paddingX: 14, paddingY: 4, radius: 4, perLine: true },
-        overlay: null,
         previewBg: '#2a2a2a',
         lightBackground: false,
       },
       {
-        id: 'gradient-scrim',
-        name: '그라디언트',
+        id: 'outline',
+        name: '아웃라인',
         textColor: '#ffffff',
         fontWeight: 800,
-        shadow: { offsetX: 0, offsetY: 1, blur: 8, color: 'rgba(0,0,0,0.4)' },
+        shadow: null,
         background: null,
-        overlay: { type: 'gradient', from: 'rgba(0,0,0,0)', to: 'rgba(0,0,0,0.65)', position: 0.45 },
-        previewBg: '#8B7355',
+        previewBg: '#1a1a2e',
         lightBackground: false,
+        stroke: { color: '#ffffff', width: 3 },
+      },
+      {
+        id: 'neon-glow',
+        name: '네온 글로우',
+        textColor: '#ff2d95',
+        fontWeight: 800,
+        shadow: null,
+        background: null,
+        previewBg: '#0a0a0a',
+        lightBackground: false,
+        neon: { color: '#ff2d95', blur: 30 },
+      },
+      {
+        id: 'knockout',
+        name: '컷아웃',
+        textColor: 'transparent',
+        fontWeight: 900,
+        shadow: null,
+        background: null,
+        previewBg: '#556b2f',
+        lightBackground: false,
+        knockout: { overlayColor: 'rgba(0,0,0,0.7)' },
       },
     ];
 
@@ -577,6 +674,7 @@
       image: null,
       title: '',
       preset: PRESETS[0],
+      gradientOverlay: false,
       fontFamily: 'Noto Sans KR',
       fontSize: 76,
     };
@@ -592,11 +690,14 @@
                 data-preset-id="${p.id}" type="button">
           <div class="preset-preview" style="background:${p.previewBg};">
             <span style="
-              color:${p.textColor};
+              color:${p.stroke ? 'transparent' : p.knockout ? p.previewBg : p.textColor};
               font-weight:${p.fontWeight};
               ${p.shadow ? `text-shadow:${p.shadow.offsetX}px ${p.shadow.offsetY}px ${p.shadow.blur}px ${p.shadow.color}` : ''}
               ${p.background && !p.background.perLine ? `;background:${p.background.color};padding:2px 6px;border-radius:${p.background.radius}px` : ''}
               ${p.background && p.background.perLine ? `;background:${p.background.color};padding:1px 5px;border-radius:${p.background.radius}px` : ''}
+              ${p.stroke ? `;-webkit-text-stroke:1.5px ${p.stroke.color}` : ''}
+              ${p.neon ? `;text-shadow:0 0 7px ${p.neon.color},0 0 20px ${p.neon.color},0 0 40px ${p.neon.color};color:#fff` : ''}
+              ${p.knockout ? `;background:${p.knockout.overlayColor};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:${p.previewBg}` : ''}
             ">가나다</span>
           </div>
           <div class="preset-name">${p.name}</div>
@@ -605,6 +706,11 @@
     }
 
     renderPresetGrid();
+
+    $('#gradientToggle').addEventListener('change', (e) => {
+      state.gradientOverlay = e.target.checked;
+      render();
+    });
 
     $('#presetGrid').addEventListener('click', (e) => {
       const btn = e.target.closest('.preset-btn');
@@ -625,25 +731,19 @@
         const img = new Image();
         img.onload = () => {
           state.image = img;
-          showThumbnail(img);
+          enterEditorMode();
           analyzeAndRecommend(img);
           render();
-          $('#downloadBtn').disabled = false;
         };
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
 
-    function showThumbnail(img) {
-      const dropzone = $('#dropzone');
-      dropzone.classList.add('has-image');
-      const existing = dropzone.querySelector('.thumb');
-      if (existing) existing.remove();
-      const thumb = document.createElement('img');
-      thumb.src = img.src;
-      thumb.className = 'thumb';
-      dropzone.appendChild(thumb);
+    function enterEditorMode() {
+      $('#uploadSection').style.display = 'none';
+      $('#editor').classList.add('visible');
+      $('.app').classList.add('editor-mode');
     }
 
     const dropzone = $('#dropzone');
@@ -664,6 +764,8 @@
       loadImage(fileInput.files[0]);
     });
 
+    $('#changeImageBtn').addEventListener('click', () => fileInput.click());
+
     // ===== RENDER =====
     function render() {
       if (!state.image) return;
@@ -680,8 +782,8 @@
 
       drawImageCover(ctx, state.image, W, H);
 
-      if (state.preset.overlay) {
-        drawOverlay(ctx, state.preset.overlay, W, H);
+      if (state.gradientOverlay) {
+        drawOverlay(ctx, { type: 'gradient', from: 'rgba(0,0,0,0)', to: 'rgba(0,0,0,0.65)', position: 0.45 }, W, H);
       }
 
       drawTitle(ctx, state.title, state.preset, W, H);
@@ -738,13 +840,81 @@
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const lines = text.split('\n').filter(l => l.trim());
+      const maxTextWidth = W * 0.85;
+      const manualLines = text.split('\n');
+      const lines = [];
+      manualLines.forEach(ml => {
+        const trimmed = ml.trim();
+        if (!trimmed) return;
+        const words = trimmed.split('');
+        let cur = '';
+        for (const ch of words) {
+          const test = cur + ch;
+          if (ctx.measureText(test).width > maxTextWidth && cur) {
+            lines.push(cur);
+            cur = ch;
+          } else {
+            cur = test;
+          }
+        }
+        if (cur) lines.push(cur);
+      });
       const lineHeight = fontSize * 1.4;
       const totalHeight = lines.length * lineHeight;
       const startY = (H - totalHeight) / 2 + lineHeight / 2;
 
       if (preset.background) {
         drawTextBackground(ctx, lines, preset, W, startY, fontSize, lineHeight);
+      }
+
+      // Knockout: draw overlay with text cut out
+      if (preset.knockout) {
+        ctx.save();
+        ctx.fillStyle = preset.knockout.overlayColor;
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.font = `${preset.fontWeight} ${fontSize}px '${state.fontFamily}', sans-serif`;
+        lines.forEach((line, i) => {
+          ctx.fillText(line.trim(), W / 2, startY + i * lineHeight);
+        });
+        ctx.restore();
+        return;
+      }
+
+      // Neon glow: multiple shadow passes
+      if (preset.neon) {
+        ctx.save();
+        const nc = preset.neon.color;
+        // Outer glow
+        ctx.shadowColor = nc;
+        ctx.shadowBlur = preset.neon.blur;
+        ctx.fillStyle = nc;
+        for (let pass = 0; pass < 3; pass++) {
+          lines.forEach((line, i) => {
+            ctx.fillText(line.trim(), W / 2, startY + i * lineHeight);
+          });
+        }
+        // Bright core
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#ffffff';
+        lines.forEach((line, i) => {
+          ctx.fillText(line.trim(), W / 2, startY + i * lineHeight);
+        });
+        ctx.restore();
+        return;
+      }
+
+      // Outline: stroke only, no fill
+      if (preset.stroke) {
+        ctx.save();
+        ctx.strokeStyle = preset.stroke.color;
+        ctx.lineWidth = Math.max(2, fontSize * 0.04);
+        ctx.lineJoin = 'round';
+        lines.forEach((line, i) => {
+          ctx.strokeText(line.trim(), W / 2, startY + i * lineHeight);
+        });
+        ctx.restore();
+        return;
       }
 
       if (preset.shadow) {
