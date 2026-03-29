@@ -630,7 +630,7 @@
         textColor: '#1a1a1a',
         fontWeight: 800,
         shadow: null,
-        background: { color: 'rgba(255,220,50,0.75)', paddingX: 14, paddingY: 4, radius: 4, perLine: true },
+        background: { color: 'rgba(255,220,50,0.75)', paddingX: 14, paddingY: 8, radius: 4, perLine: true },
         previewBg: '#2a2a2a',
         lightBackground: false,
       },
@@ -942,10 +942,12 @@
         lines.forEach((line, i) => {
           const metrics = ctx.measureText(line.trim());
           const tw = metrics.width;
+          const ascent = metrics.actualBoundingBoxAscent;
+          const descent = metrics.actualBoundingBoxDescent;
           const x = W / 2 - tw / 2 - bg.paddingX;
-          const y = startY + i * lineHeight - fontSize / 2 - bg.paddingY;
+          const y = startY + i * lineHeight - ascent - bg.paddingY;
           const w = tw + bg.paddingX * 2;
-          const h = fontSize + bg.paddingY * 2;
+          const h = ascent + descent + bg.paddingY * 2;
           roundRect(ctx, x, y, w, h, bg.radius, bg.color);
         });
       } else if (bg.blur) {
