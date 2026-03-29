@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reels Cover Generator</title>
+  <link rel="icon" href="/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Google Fonts CDN (한글 폰트) -->
@@ -61,6 +62,20 @@
     }
 
     /* ── Header ── */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ink-mid);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.75rem;
+      transition: color 0.15s;
+    }
+    .back-btn:hover { color: var(--ink); }
+    .back-btn svg { width: 14px; height: 14px; }
     .header {
       display: flex;
       align-items: baseline;
@@ -368,6 +383,10 @@
 </head>
 <body>
   <div class="app">
+    <a href="/" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      util.80rian.com
+    </a>
     <header class="header">
       <h1>REELS COVER</h1>
       <span class="version-tag">v1.0</span>
